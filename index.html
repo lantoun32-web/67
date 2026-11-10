@@ -1,0 +1,342 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ARCADEX</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#080b12;color:white;font-family:Arial,sans-serif}
+header{height:76px;background:#101722;border-bottom:1px solid #263548;display:flex;align-items:center;padding:0 30px;gap:15px;position:sticky;top:0;z-index:5}
+.logo{width:43px;height:43px;border-radius:13px;background:linear-gradient(135deg,#48eed1,#6275ff);display:grid;place-items:center;color:#07121a;font-weight:1000;font-size:25px}
+.brand{font-size:21px;font-weight:900;letter-spacing:3px}
+.brand small{display:block;color:#7e91a8;font-size:9px;letter-spacing:3px;margin-top:3px}
+#search{margin-left:auto;width:270px;background:#192332;border:1px solid #344459;border-radius:12px;padding:13px;color:white;outline:none}
+#search:focus{border-color:#55e6d1}
+main{max-width:1600px;margin:auto;padding:30px}
+.hero{padding:35px;border-radius:22px;background:linear-gradient(115deg,#142d38,#202044);border:1px solid #31465d;margin-bottom:30px;position:relative;overflow:hidden}
+.hero:after{content:"ARCADEX";position:absolute;right:25px;bottom:-32px;font-size:100px;font-weight:1000;color:#ffffff08;letter-spacing:5px}
+.hero h1{font-size:42px;margin:0 0 10px;letter-spacing:-1px}
+.hero h1 span{color:#55e6d1}
+.hero p{color:#a8b9cb;margin:0}
+.info{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
+.pill{background:#ffffff12;border:1px solid #ffffff20;border-radius:30px;padding:8px 14px;font-size:12px;color:#c4d3e4}
+.section{display:flex;align-items:center;justify-content:space-between;margin:28px 0 17px}
+.section h2{font-size:18px;letter-spacing:2px;margin:0}
+.section span{color:#8396ad;font-size:12px}
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:19px}
+.card{border:1px solid #25364a;background:#111a27;border-radius:17px;padding:9px;cursor:pointer;transition:.2s;min-width:0}
+.card:hover{transform:translateY(-5px);border-color:#55e6d1;box-shadow:0 12px 35px #0008}
+.cover{height:145px;border-radius:11px;position:relative;overflow:hidden;display:grid;place-items:center;background:linear-gradient(135deg,#193e50,#28234d)}
+.cover canvas{position:absolute;inset:0;width:100%;height:100%}
+.cover:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,#080b12a8,transparent 65%)}
+.coverIcon{position:relative;z-index:1;font-size:43px;text-shadow:0 5px 18px #0009}
+.coverLabel{position:absolute;z-index:2;bottom:10px;left:12px;right:12px;font-size:10px;font-weight:bold;letter-spacing:2px;color:#ffffffb5}
+.card h3{font-size:14px;margin:13px 5px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card small{display:block;color:#8193a9;font-size:10px;margin:0 5px 7px}
+.empty{grid-column:1/-1;text-align:center;padding:60px 20px;color:#8295aa;border:1px dashed #344459;border-radius:15px}
+#loading{color:#55e6d1}
+#player{display:none;position:fixed;inset:0;background:#05070b;z-index:20;flex-direction:column}
+#bar{height:55px;background:#101722;display:flex;align-items:center;padding:8px 14px;gap:12px;border-bottom:1px solid #263548}
+#bar strong{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#bar button{background:#1b2a3b;border:1px solid #35495d;color:white;padding:9px 14px;border-radius:9px;cursor:pointer}
+#game{flex:1;width:100%;border:0;background:white}
+#message{position:absolute;inset:55px 0 0;display:none;place-items:center;text-align:center;padding:25px;background:#080b12;color:#dce8f5;z-index:2}
+#message.show{display:grid}
+#message strong{font-size:22px;color:#55e6d1}
+@media(max-width:600px){
+ header{padding:0 12px}
+ .brand{font-size:16px}
+ #search{width:130px}
+ main{padding:15px}
+ .hero{padding:24px}
+ .hero h1{font-size:31px}
+ #grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .cover{height:115px}
+}
+</style>
+</head>
+
+<body>
+<header>
+ <div class="logo">A</div>
+ <div class="brand">ARCADEX<small>THE GAME COLLECTION</small></div>
+ <input id="search" placeholder="Search games...">
+</header>
+
+<main>
+ <section class="hero">
+  <h1>ENTER THE <span>ARCADEX.</span></h1>
+  <p>Your collection of HTML games. Pick a game and start playing.</p>
+  <div class="info">
+   <div class="pill" id="total">Loading games...</div>
+   <div class="pill">HTML GAME COLLECTION</div>
+   <div class="pill">INSTANT PREVIEW</div>
+  </div>
+ </section>
+
+ <div class="section">
+  <h2>ALL GAMES</h2>
+  <span id="shown">Loading...</span>
+ </div>
+
+ <div id="grid">
+  <div class="empty" id="loading">Loading the game collection...</div>
+ </div>
+</main>
+
+<div id="player">
+ <div id="bar">
+  <button id="back">← Back</button>
+  <strong id="gameName">Game</strong>
+  <button id="fullscreen">⛶ Fullscreen</button>
+ </div>
+
+ <div id="message">
+  <div>
+   <strong>Loading game...</strong>
+   <p id="messageText">Preparing the HTML game.</p>
+  </div>
+ </div>
+
+ <iframe id="game"
+  title="Game preview"
+  sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-downloads allow-modals allow-presentation"
+  allow="fullscreen; autoplay; gamepad; pointer-lock">
+ </iframe>
+</div>
+
+<script>
+const OWNER="CoolDude2349";
+const REPO="Offline-HTML-Games-Pack";
+const BRANCH="master";
+
+const API=`https://api.github.com/repos/${OWNER}/${REPO}/contents/offline?ref=${BRANCH}`;
+
+const grid=document.getElementById("grid");
+const search=document.getElementById("search");
+const total=document.getElementById("total");
+const shown=document.getElementById("shown");
+const player=document.getElementById("player");
+const frame=document.getElementById("game");
+const message=document.getElementById("message");
+const messageText=document.getElementById("messageText");
+
+let games=[];
+let selected=null;
+
+const symbols=["✦","◈","⚡","◆","✧","⬡","★","◉","▣","✺"];
+
+const colors=[
+ ["#123f4b","#167d80","#62e9d1"],
+ ["#241c50","#5d3e9d","#b18cff"],
+ ["#4b241e","#b74d3c","#ffb16d"],
+ ["#152c54","#315eb5","#75b8ff"],
+ ["#3b194c","#873e9c","#ee91e9"],
+ ["#183b2c","#36875c","#9bf1a4"],
+ ["#493317","#a47730","#ffe18a"]
+];
+
+function hash(s){
+ let h=0;
+ for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;
+ return Math.abs(h);
+}
+
+function makeCover(canvas,name){
+ const ctx=canvas.getContext("2d");
+ const seed=hash(name);
+ const palette=colors[seed%colors.length];
+ const w=canvas.width=500;
+ const h=canvas.height=320;
+
+ const gradient=ctx.createLinearGradient(0,0,w,h);
+ gradient.addColorStop(0,palette[0]);
+ gradient.addColorStop(1,palette[1]);
+ ctx.fillStyle=gradient;
+ ctx.fillRect(0,0,w,h);
+
+ for(let i=0;i<17;i++){
+  const x=(seed*(i+5)*13)%w;
+  const y=(seed*(i+9)*7)%h;
+  const r=12+((seed+i*23)%48);
+  ctx.beginPath();
+  ctx.arc(x,y,r,0,Math.PI*2);
+  ctx.fillStyle=palette[2];
+  ctx.globalAlpha=.09+(i%3)*.035;
+  ctx.fill();
+ }
+
+ ctx.globalAlpha=1;
+ ctx.strokeStyle=palette[2];
+ ctx.globalAlpha=.35;
+ ctx.lineWidth=3;
+
+ for(let i=0;i<5;i++){
+  ctx.beginPath();
+  ctx.moveTo((seed+i*83)%w,0);
+  ctx.lineTo((seed+i*107)%w,h);
+  ctx.stroke();
+ }
+
+ ctx.globalAlpha=1;
+ ctx.fillStyle="#fff";
+ ctx.font="bold 100px Arial";
+ ctx.textAlign="center";
+ ctx.textBaseline="middle";
+ ctx.shadowColor="#000";
+ ctx.shadowBlur=20;
+ ctx.fillText(symbols[seed%symbols.length],w/2,h/2);
+ ctx.shadowBlur=0;
+}
+
+function render(){
+ const q=search.value.trim().toLowerCase();
+ const list=games.filter(g=>g.name.toLowerCase().includes(q));
+
+ grid.innerHTML="";
+ shown.textContent=list.length+" games shown";
+
+ if(!list.length){
+  grid.innerHTML='<div class="empty">No games found.</div>';
+  return;
+ }
+
+ list.forEach(g=>{
+  const card=document.createElement("div");
+  card.className="card";
+
+  const cover=document.createElement("div");
+  cover.className="cover";
+
+  const canvas=document.createElement("canvas");
+  makeCover(canvas,g.name);
+  cover.appendChild(canvas);
+
+  const icon=document.createElement("div");
+  icon.className="coverIcon";
+  icon.textContent=symbols[hash(g.name)%symbols.length];
+  cover.appendChild(icon);
+
+  const label=document.createElement("div");
+  label.className="coverLabel";
+  label.textContent="ARCADEX • GAME";
+  cover.appendChild(label);
+
+  const title=document.createElement("h3");
+  title.textContent=g.name;
+  title.title=g.name;
+
+  const sub=document.createElement("small");
+  sub.textContent="HTML GAME";
+
+  card.append(cover,title,sub);
+  card.onclick=()=>openGame(g);
+  grid.appendChild(card);
+ });
+}
+
+function showMessage(title,detail){
+ message.querySelector("strong").textContent=title;
+ messageText.textContent=detail;
+ message.classList.add("show");
+}
+
+// FIXED GAME LOADER
+function openGame(g){
+ selected=g;
+ document.getElementById("gameName").textContent=g.name;
+ player.style.display="flex";
+
+ showMessage("Loading game...","Opening game files.");
+
+ frame.onload=null;
+ frame.src="about:blank";
+
+ frame.onload=()=>{
+  if(selected===g){
+   message.classList.remove("show");
+  }
+ };
+
+ // Use the original URL to preserve relative resource paths.
+ frame.src=g.download_url;
+}
+
+function closeGame(){
+ selected=null;
+ frame.onload=null;
+ frame.src="about:blank";
+ message.classList.remove("show");
+ player.style.display="none";
+}
+
+document.getElementById("back").onclick=closeGame;
+
+document.getElementById("fullscreen").onclick=async()=>{
+ try{
+  if(frame.requestFullscreen){
+   await frame.requestFullscreen();
+  }else{
+   await player.requestFullscreen();
+  }
+ }catch(e){
+  alert("Fullscreen is unavailable in this browser.");
+ }
+};
+
+search.addEventListener("input",render);
+
+document.addEventListener("keydown",e=>{
+ if(e.key==="Escape"&&player.style.display==="flex"&&!document.fullscreenElement){
+  closeGame();
+ }
+});
+
+document.addEventListener("fullscreenchange",()=>{
+ if(!document.fullscreenElement&&selected){
+  // Keep the game open when exiting fullscreen.
+ }
+});
+
+async function loadGames(){
+ try{
+  const response=await fetch(API);
+
+  if(!response.ok){
+   throw new Error("GitHub could not provide the game list. HTTP "+response.status);
+  }
+
+  const files=await response.json();
+
+  games=files
+   .filter(f=>f.type==="file"&&/\.html?$/i.test(f.name))
+   .map(f=>({
+    name:f.name
+     .replace(/\.html?$/i,"")
+     .replace(/[_-]+/g," "),
+    filename:f.name,
+    download_url:`https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/offline/${encodeURIComponent(f.name)}`
+   }))
+   .sort((a,b)=>a.name.localeCompare(b.name));
+
+  total.textContent=games.length+" GAMES AVAILABLE";
+  render();
+
+ }catch(error){
+  grid.innerHTML=
+   '<div class="empty">Could not load the collection.<br>'+
+   error.message+
+   '<br>Refresh the page and try again.</div>';
+
+  total.textContent="Collection unavailable";
+  shown.textContent="0 games";
+ }
+}
+
+loadGames();
+</script>
+</body>
+</html>
